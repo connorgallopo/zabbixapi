@@ -7,8 +7,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'zabbixapi/version'
 
 Gem::Specification.new do |spec|
-  spec.add_dependency 'http', '~> 2.0'
-  spec.add_dependency 'json', '~> 2.0'
+  spec.add_dependency 'json', '>= 2.0'
   spec.add_development_dependency 'bundler'
 
   spec.name        = 'zabbixapi'
@@ -25,5 +24,5 @@ Gem::Specification.new do |spec|
 
   spec.files         = ['CHANGELOG.md', 'LICENSE.md', 'README.md', 'zabbixapi.gemspec'] + Dir['lib/**/*.rb']
   spec.require_paths = 'lib'
-  spec.required_ruby_version = '>= 2.0.0'
+  spec.required_ruby_version = '>= 3.1.0'
 end
