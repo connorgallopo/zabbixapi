@@ -12,6 +12,7 @@ require 'zabbixapi/classes/configurations'
 require 'zabbixapi/classes/errors'
 require 'zabbixapi/classes/events'
 require 'zabbixapi/classes/graphs'
+require 'zabbixapi/classes/history'
 require 'zabbixapi/classes/hostgroups'
 require 'zabbixapi/classes/hosts'
 require 'zabbixapi/classes/httptests'
@@ -96,6 +97,11 @@ class ZabbixApi
   # @return [ZabbixApi::Graphs]
   def graphs
     @graphs ||= Graphs.new(@client)
+  end
+
+  # @return [ZabbixApi::History]
+  def history
+    @history ||= History.new(@client)
   end
 
   # @return [ZabbixApi::HostGroups]
