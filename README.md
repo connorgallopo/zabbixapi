@@ -1,98 +1,149 @@
 # Ruby Zabbix Api Module
 
-[![Gem Version](http://img.shields.io/gem/v/zabbixapi.svg)][gem]
-[![Build Status](https://github.com/anapsix/zabbixapi/workflows/CI/badge.svg)][github-ci]
-
-[gem]: https://rubygems.org/gems/zabbixapi
-[github-ci]: https://github.com/express42/zabbixapi/actions?query=workflow%3ACI
-
 Simple and lightweight ruby module for working with [Zabbix][Zabbix] via the [Zabbix API][Zabbix API]
 
 ## Installation
-```sh
-# latest
-gem install zabbixapi
 
-# specific version
-gem install zabbixapi -v 4.2.0
+```ruby
+# Gemfile
+gem 'zabbixapi', github: 'connorgallopo/zabbixapi'
 ```
 
-## Documentation
-[http://rdoc.info/gems/zabbixapi][documentation]
+## Quick Start
 
-[documentation]: http://rdoc.info/gems/zabbixapi
+```ruby
+require 'zabbixapi'
 
-## Examples
-[https://github.com/express42/zabbixapi/tree/master/examples][examples]
+zabbix = ZabbixApi.connect(
+  url: 'https://zabbix.example.com/api_jsonrpc.php',
+  user: 'Admin',
+  password: 'zabbix'
+)
 
-[examples]: https://github.com/express42/zabbixapi/tree/master/examples
+# Get all hosts
+zabbix.hosts.all
 
-## Version Policy
+# Get a host ID
+zabbix.hosts.get_id(host: 'myhost.example.com')
 
-**NOTE:** `master` branch is used for ongoing development on Zabbix API 5.x (5.0 and 5.2).
+# Create a host
+zabbix.hosts.create(
+  host: 'myhost.example.com',
+  interfaces: [{
+    type: 1,
+    main: 1,
+    ip: '192.168.1.1',
+    dns: '',
+    port: '10050',
+    useip: 1
+  }],
+  groups: [{ groupid: '2' }]
+)
+```
 
-We support only two last versions of zabbix (5.0 and 5.2), so you should consider all previous versions deprecated.
+## History
 
-* Zabbix 1.8.2 (api version 1.2) | zabbixapi 0.6.x | [branch zabbix1.8](https://github.com/express42/zabbixapi/tree/zabbix1.8)
-* Zabbix 1.8.9 (api version 1.3) | zabbixapi 0.6.x | [branch zabbix1.8](https://github.com/express42/zabbixapi/tree/zabbix1.8)
-* Zabbix 2.0.x (api version 1.4 -> 2.0.10) | zabbixapi 2.0.x | [branch zabbix2.0](https://github.com/express42/zabbixapi/tree/zabbix2.0)
-* Zabbix 2.2.x (api version 2.2.x) | zabbixapi 2.2.x | [branch zabbix2.2](https://github.com/express42/zabbixapi/tree/zabbix2.2)
-* Zabbix 2.4.x (api version 2.2.x) | zabbixapi 2.4.x | [branch zabbix2.4](https://github.com/express42/zabbixapi/tree/zabbix2.4)
-* Zabbix 3.0.x (api version 3.0.x) | zabbixapi 3.0.x | [branch zabbix3.0](https://github.com/express42/zabbixapi/tree/zabbix3.0)
-* Zabbix 3.2.x (api version 3.2.x) | zabbixapi 3.2.x | [branch zabbix3.2](https://github.com/express42/zabbixapi/tree/zabbix3.2)
-* Zabbix 4.0.x (api version 4.0.x) | zabbixapi 4.1.x | [branch zabbix4.0](https://github.com/express42/zabbixapi/tree/zabbix4.0)
-* Zabbix 4.2.x (api version 4.2.x) | zabbixapi 4.1.x | [branch zabbix4.0](https://github.com/express42/zabbixapi/tree/zabbix4.0)
-* Zabbix 4.4.x (api version 4.4.x) | zabbixapi 4.2.x | [branch zabbix4.2](https://github.com/express42/zabbixapi/tree/zabbix4.2)
+Retrieve historical metric data from Zabbix:
 
-## Supported Ruby Versions
-This library aims to support and is [tested against][github-ci] the following Ruby
-versions:
+```ruby
+# History value types
+ZabbixApi::History::NUMERIC_FLOAT    # 0
+ZabbixApi::History::CHARACTER        # 1
+ZabbixApi::History::LOG              # 2
+ZabbixApi::History::NUMERIC_UNSIGNED # 3
+ZabbixApi::History::TEXT             # 4
+ZabbixApi::History::BINARY           # 5
 
-* Ruby 2.5
-* Ruby 2.6
-* Ruby 2.7
-* JRuby 9.2.10.0
+# Get history for an item
+zabbix.history.get(itemids: '12345', history: ZabbixApi::History::NUMERIC_UNSIGNED)
 
-If something doesn't work on one of these versions, it's a bug.
+# Get the latest value
+zabbix.history.get_latest(item_id, ZabbixApi::History::NUMERIC_UNSIGNED)
 
-This library may inadvertently work (or seem to work) on other Ruby versions,
-however support will only be provided for the versions listed above.
+# Get the latest value as a number
+nvps = zabbix.history.get_latest_value(item_id, ZabbixApi::History::NUMERIC_UNSIGNED)
 
-If you would like this library to support another Ruby version or
-implementation, you may volunteer to be a maintainer. Being a maintainer
-entails making sure all tests run and pass on that implementation. When
-something breaks on your implementation, you will be responsible for providing
-patches in a timely fashion. If critical issues for a particular implementation
-exist at the time of a major release, support for that Ruby version may be
-dropped.
+# Get history within a time range
+zabbix.history.get_range(item_id, time_from, time_till, ZabbixApi::History::NUMERIC_UNSIGNED)
+
+# Count history records
+zabbix.history.count(item_id, ZabbixApi::History::NUMERIC_UNSIGNED)
+```
+
+### Example: Get NVPS (New Values Per Second)
+
+```ruby
+# Find the NVPS item on the Zabbix server
+items = zabbix.items.get_full_data(key_: 'zabbix[wcache,values]')
+item_id = items.first['itemid']
+
+# Get current NVPS
+nvps = zabbix.history.get_latest_value(item_id, ZabbixApi::History::NUMERIC_UNSIGNED)
+puts "Current NVPS: #{nvps}"
+```
+
+## Available Resources
+
+- `actions` - Trigger actions
+- `applications` - Applications (deprecated in Zabbix 5.4+)
+- `configurations` - Import/export configurations
+- `drules` - Discovery rules
+- `events` - Events
+- `graphs` - Graphs
+- `history` - Historical data
+- `hostgroups` - Host groups
+- `hosts` - Hosts
+- `httptests` - Web scenarios
+- `items` - Items
+- `maintenance` - Maintenance periods
+- `mediatypes` - Media types
+- `problems` - Problems
+- `proxies` - Proxies
+- `proxygroup` - Proxy groups (Zabbix 7+)
+- `roles` - User roles
+- `screens` - Screens (deprecated)
+- `scripts` - Scripts
+- `server` - Server info
+- `templates` - Templates
+- `triggers` - Triggers
+- `usergroups` - User groups
+- `usermacros` - User macros
+- `users` - Users
+- `valuemaps` - Value maps
+
+## Raw API Queries
+
+```ruby
+zabbix.query(
+  method: 'host.get',
+  params: {
+    output: 'extend',
+    filter: { host: 'myhost' }
+  }
+)
+```
+
+## Logout
+
+```ruby
+zabbix.logout
+```
+
+## Version Support
+
+This fork supports:
+- Zabbix 5.x, 6.x, 7.x
+- Ruby 3.1+
 
 ## Dependencies
 
-* net/http
-* json
+- net/http (stdlib)
+- json
 
-## Contributing
+## Zabbix Documentation
 
-* Fork the project.
-* Base your work on the master branch.
-* Make your feature addition or bug fix, write tests, write documentation/examples.
-* Commit, do not mess with rakefile, version.
-* Make a pull request.
-
-## Zabbix documentation
-
-* [Zabbix Project Homepage][Zabbix]
-* [Zabbix API docs][Zabbix API]
+- [Zabbix Project Homepage][Zabbix]
+- [Zabbix API docs][Zabbix API]
 
 [Zabbix]: https://www.zabbix.com
-[Zabbix API]: https://www.zabbix.com/documentation/5.2/manual/api
-
-## Copyright
-
-- Copyright (c) 2021 [contributors]
-- Copyright (c) 2015-2018 Express 42 and [contributors]
-
-See [LICENSE] for details.
-
-[LICENSE]: LICENSE.md
-[contributors]: https://github.com/express42/zabbixapi/graphs/contributors
+[Zabbix API]: https://www.zabbix.com/documentation/current/en/manual/api
