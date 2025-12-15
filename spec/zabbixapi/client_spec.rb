@@ -61,7 +61,7 @@ describe 'ZabbixApi::Client' do
       allow_any_instance_of(ZabbixApi::Client).to receive(:api_request).with(
         method: 'user.login',
         params: {
-          user: nil,
+          username: nil,
           password: nil
         }
       )
@@ -71,7 +71,7 @@ describe 'ZabbixApi::Client' do
       expect_any_instance_of(ZabbixApi::Client).to receive(:api_request).with(
         method: 'user.login',
         params: {
-          user: nil,
+          username: nil,
           password: nil
         }
       )
@@ -86,7 +86,7 @@ describe 'ZabbixApi::Client' do
       allow_any_instance_of(ZabbixApi::Client).to receive(:api_request).with(
         method: 'user.login',
         params: {
-          user: nil,
+          username: nil,
           password: nil
         }
       )
@@ -112,7 +112,7 @@ describe 'ZabbixApi::Client' do
       allow_any_instance_of(ZabbixApi::Client).to receive(:api_request).with(
         method: 'user.login',
         params: {
-          user: nil,
+          username: nil,
           password: nil
         }
       )

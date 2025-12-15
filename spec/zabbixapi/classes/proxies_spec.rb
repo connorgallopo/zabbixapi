@@ -13,7 +13,7 @@ describe 'ZabbixApi::Proxies' do
   describe '.identify' do
     subject { proxies_mock.identify }
 
-    it { is_expected.to eq 'host' }
+    it { is_expected.to eq 'name' }
   end
 
   describe '.delete' do

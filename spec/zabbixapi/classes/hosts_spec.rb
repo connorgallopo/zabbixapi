@@ -33,7 +33,7 @@ describe 'ZabbixApi::Hosts' do
             testkey: 222
           },
           output: 'extend',
-          selectGroups: 'shorten'
+          selectHostGroups: 'extend'
         }
       ).and_return(result)
     end
@@ -55,8 +55,7 @@ describe 'ZabbixApi::Hosts' do
         interfaces: [],
         status: 0,
         available: 1,
-        groups: [],
-        proxy_hostid: nil
+        groups: []
       }
     end
 
