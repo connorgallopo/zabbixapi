@@ -72,8 +72,8 @@ describe 'ZabbixApi::Triggers' do
     end
 
     before do
-      allow(triggers_mock).to receive(:dump_by_id).with(test: '1').and_return(id_hash)
-      allow(triggers_mock).to receive(:symbolize_keys).with('test' => 1).and_return(dump)
+      allow(triggers_mock).to receive(:dump_by_id).with({ test: '1' }).and_return(id_hash)
+      allow(triggers_mock).to receive(:symbolize_keys).with({ 'test' => 1 }).and_return(dump)
       allow(triggers_mock).to receive(:hash_equals?).with(dump, data).and_return(hash_equals)
       allow(triggers_mock).to receive(:key).and_return(key)
       allow(triggers_mock).to receive(:method_name).and_return(method_name)
@@ -97,7 +97,7 @@ describe 'ZabbixApi::Triggers' do
 
     context 'when dump and data hash are equal' do
       it 'logs debug message' do
-        expect(triggers_mock).to receive(:log).with('[DEBUG] Equal keys {:test=>"1", :triggerid=>7878, :expression=>"{.33(44)}"} and {:test=>"1", :triggerid=>7878, :expression=>"{.33(44)}"}, skip safe_update')
+        expect(triggers_mock).to receive(:log).with('[DEBUG] Equal keys {test: "1", triggerid: 7878, expression: "{.33(44)}"} and {test: "1", triggerid: 7878, expression: "{.33(44)}"}, skip safe_update')
         expect(triggers_mock).not_to receive(:log).with("[DEBUG] disable : #{result.inspect}")
         subject
       end
