@@ -30,7 +30,7 @@ class ZabbixApi
             key.to_sym => data[key.to_sym]
           },
           output: 'extend',
-          selectGroups: 'shorten'
+          selectHostGroups: 'extend'
         }
       )
     end
@@ -44,8 +44,7 @@ class ZabbixApi
         interfaces: [],
         status: 0,
         available: 1,
-        groups: [],
-        proxy_hostid: nil
+        groups: []
       }
     end
 
