@@ -52,6 +52,46 @@ class ZabbixApi
     @current ||= ZabbixApi.new
   end
 
+  # Fetches the API version from a Zabbix server without authentication
+  #
+  # @param url [String] The Zabbix API endpoint URL
+  # @param timeout [Integer] Request timeout in seconds (default: 10)
+  # @return [String] The API version (e.g., "7.4.0")
+  # @raise [ZabbixApi::HttpError] if HTTP request fails
+  # @raise [ZabbixApi::ApiError] if API returns an error
+  #
+  # @example
+  #   ZabbixApi.api_version(url: 'http://zabbix.example.com/api_jsonrpc.php')
+  #   # => "7.4.0"
+  def self.api_version(url:, timeout: 10)
+    uri = URI.parse(url)
+
+    http = Net::HTTP.new(uri.host, uri.port)
+    if uri.scheme == 'https'
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    http.open_timeout = timeout
+    http.read_timeout = timeout
+
+    request = Net::HTTP::Post.new(uri.request_uri)
+    request.add_field('Content-Type', 'application/json-rpc')
+    request.body = JSON.generate(
+      jsonrpc: '2.0',
+      method: 'apiinfo.version',
+      params: [],
+      id: 1
+    )
+
+    response = http.request(request)
+    raise HttpError.new("HTTP Error: #{response.code} on #{url}", response) unless response.code == '200'
+
+    result = JSON.parse(response.body)
+    raise ApiError.new("API error: #{result['error']}", result) if result['error']
+
+    result['result']
+  end
+
   # Executes an API request directly using a custom query
   #
   # @param data [Hash]
